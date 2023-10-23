@@ -1,0 +1,3 @@
+prompt,seed,width,height,sampler,cfgs,steps,filename,negative_prompt
+a beautiful girl,676649435,1024,1024,Euler a,7,20,00000-676649435.png,
+"A beautiful girl, a masterpiece, high-definition picture quality, high-definition wallpaper.",1,512,512,DPM++ 2M Karras,7,20,00001-1.png,
