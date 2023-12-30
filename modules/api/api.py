@@ -347,7 +347,7 @@ class Api:
         if not self.default_script_arg_txt2img:
             self.default_script_arg_txt2img = self.init_default_script_args(script_runner)
         selectable_scripts, selectable_script_idx = self.get_selectable_script(txt2imgreq.script_name, script_runner)
-
+        print("请求参数：", txt2imgreq)
         populate = txt2imgreq.copy(update={  # Override __init__ params
             "sampler_name": validate_sampler_name(txt2imgreq.sampler_name or txt2imgreq.sampler_index),
             "do_not_save_samples": not txt2imgreq.save_images,
@@ -365,7 +365,12 @@ class Api:
             args["override_settings"] = {"sd_model_checkpoint": txt2imgreq.model_checkpoint}
 
         script_args = self.init_script_args(txt2imgreq, self.default_script_arg_txt2img, selectable_scripts, selectable_script_idx, script_runner)
-
+        if not txt2imgreq.control_enabled:
+            for sa in range(len(script_args)):
+                ta = str(type(script_args[sa]))
+                if "UiControlNetUnit" in ta:
+                    script_args[sa].enabled = False
+                    break
         if txt2imgreq.control_enabled and txt2imgreq.control_type != 0:
             txt2imgreq.steps = 30
             args["steps"] = 30
@@ -439,7 +444,9 @@ class Api:
                     shared.total_tqdm.clear()
 
         b64images = list(map(encode_pil_to_base64, processed.images)) if send_images else []
-
+        if txt2imgreq.control_enabled and b64images:
+            b64images = b64images[:-1]
+        print(f"是否上传参考图：{txt2imgreq.control_enabled}， 图片数：{txt2imgreq.n_iter}， 生成图片数，{len(b64images)}")
 
         return models.TextToImageResponse(images=b64images)
 
